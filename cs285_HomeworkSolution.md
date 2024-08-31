@@ -57,3 +57,71 @@ $$
 
   ​	$J(\pi^*) - J(\pi_\theta) = \mathcal{O}(T^{2} \epsilon)$
 
+### 2. Code
+Show in codes
+### 3. Behavioral Cloning
+**Outputs**
+- `Ant-v4`
+  ```shell
+  Eval_StdReturn : 0.0
+  Eval_MaxReturn : 453.48095703125
+  Eval_MinReturn : 453.48095703125
+  Eval_AverageEpLen : 1000.0
+  Train_AverageReturn : 4681.891673935816
+  Train_StdReturn : 30.70862278765526
+  Train_MaxReturn : 4712.600296723471
+  Train_MinReturn : 4651.18305114816
+  Train_AverageEpLen : 1000.0
+  Training Loss : 3.739296880667098e-05
+  Train_EnvstepsSoFar : 0
+  TimeSinceStart : 1.4117987155914307
+  Initial_DataCollection_AverageReturn : 4681.891673935816
+  ```
+- `HalfCheetah`
+  ```shell
+  Eval_StdReturn : 0.0
+  Eval_MaxReturn : 1598.0390625
+  Eval_MinReturn : 1598.0390625
+  Eval_AverageEpLen : 1000.0
+  Train_AverageReturn : 4034.7999834965067
+  Train_StdReturn : 32.8677631311341
+  Train_MaxReturn : 4067.6677466276406
+  Train_MinReturn : 4001.9322203653724
+  Train_AverageEpLen : 1000.0
+  Training Loss : 7.291514066309901e-06
+  Train_EnvstepsSoFar : 0
+  TimeSinceStart : 1.2278029918670654
+  Initial_DataCollection_AverageReturn : 4034.7999834965067
+  ```
+- `Hopper`
+  ```shell
+  Eval_StdReturn : 0.0
+  Eval_MaxReturn : 1362.51611328125
+  Eval_MinReturn : 1362.51611328125
+  Eval_AverageEpLen : 1000.0
+  Train_AverageReturn : 3717.5129936182307
+  Train_StdReturn : 0.3530361779417035
+  Train_MaxReturn : 3717.8660297961724
+  Train_MinReturn : 3717.159957440289
+  Train_AverageEpLen : 1000.0
+  Training Loss : 6.329021562123671e-05
+  Train_EnvstepsSoFar : 0
+  TimeSinceStart : 1.332962989807129
+  Initial_DataCollection_AverageReturn : 3717.5129936182307
+  ```
+- `Walker2d`
+  ```shell
+  Eval_StdReturn : 0.0
+  Eval_MaxReturn : 897.5069580078125
+  Eval_MinReturn : 897.5069580078125
+  Eval_AverageEpLen : 1000.0
+  Train_AverageReturn : 5383.310325177668
+  Train_StdReturn : 54.15251563871789
+  Train_MaxReturn : 5437.462840816386
+  Train_MinReturn : 5329.1578095389505
+  Train_AverageEpLen : 1000.0
+  Training Loss : 0.00044358352897688746
+  Train_EnvstepsSoFar : 0
+  TimeSinceStart : 1.322859525680542
+  Initial_DataCollection_AverageReturn : 5383.310325177668
+  ```

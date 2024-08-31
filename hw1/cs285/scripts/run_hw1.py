@@ -143,7 +143,7 @@ def run_training_loop(params):
                 # and replace paths[i]["action"] with these expert labels
                 for path in paths:
                     expert_action = expert_policy.get_action(path["observation"])
-                    path["action"] = expert_action if path["action"] != expert_action else path["action"]
+                    path["action"] = expert_action if (path["action"] != expert_action).all() else path["action"]
                 # paths = TODO
 
         total_envsteps += envsteps_this_batch
@@ -160,8 +160,10 @@ def run_training_loop(params):
           # HINT2: use np.random.permutation to sample random indices
           # HINT3: return corresponding data points from each array (i.e., not different indices from each array)
           # for imitation learning, we only need observations and actions.  
-          rand_indices = np.random.permutation(len(replay_buffer))
-          ob_batch, ac_batch = replay_buffer.obs[*rand_indices[:params['train_batch_size']]], replay_buffer.acs[*rand_indices[:params['train_batch_size']]]
+          rand_indices = np.random.permutation(params['train_batch_size'])
+          ob_batch, ac_batch = replay_buffer.obs[rand_indices], replay_buffer.acs[rand_indices]
+          ob_batch = torch.tensor(ob_batch, dtype=torch.float32).to(ptu.device)
+          ac_batch = torch.tensor(ac_batch, dtype=torch.float32).to(ptu.device)
 
           # use the sampled data to train an agent
           train_log = actor.update(ob_batch, ac_batch)
