@@ -94,12 +94,12 @@ class PGAgent(nn.Module):
             # trajectory at each point.
             # In other words: Q(s_t, a_t) = sum_{t'=0}^T gamma^t' r_{t'}
             # TODO: use the helper function self._discounted_return to calculate the Q-values
-            q_values = None
+            q_values = self._discounted_return(rewards).sum()
         else:
             # Case 2: in reward-to-go PG, we only use the rewards after timestep t to estimate the Q-value for (s_t, a_t).
             # In other words: Q(s_t, a_t) = sum_{t'=t}^T gamma^(t'-t) * r_{t'}
             # TODO: use the helper function self._discounted_reward_to_go to calculate the Q-values
-            q_values = None
+            q_values = self._discounted_reward_to_go(rewards).sum()
 
         return q_values
 
@@ -156,7 +156,7 @@ class PGAgent(nn.Module):
         Note that all entries of the output list should be the exact same because each sum is from 0 to T (and doesn't
         involve t)!
         """
-        return None
+        return self.gamma ** (len(rewards) - 1) * rewards
 
 
     def _discounted_reward_to_go(self, rewards: Sequence[float]) -> Sequence[float]:
@@ -164,4 +164,6 @@ class PGAgent(nn.Module):
         Helper function which takes a list of rewards {r_0, r_1, ..., r_t', ... r_T} and returns a list where the entry
         in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}.
         """
-        return None
+        # for i in range(len(rewards)):
+        #     rewards[i] *= self.gamma ** (len(rewards) - i)
+        return self.gamma ** (len(rewards) - rewards.index) * rewards
