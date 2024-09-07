@@ -58,16 +58,19 @@ class MLPPolicy(nn.Module):
     @torch.no_grad()
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         """Takes a single observation (as a numpy array) and returns a single action (as a numpy array)."""
-        # TODO: implement get_action
-        if len(obs.shape) > 1:
-            observation = obs
-        else:
-            observation = obs[None]
+        # DONE: implement get_action
+        obs = ptu.from_numpy(obs)
+        action_distribution = self.forward(obs)
         
         # Sample action from its distribution related to observation
-        observation = ptu.from_numpy(observation)
-        action = self.forward(observation)
-        return ptu.to_numpy(action.sample())
+        # Using rsample to allow gradients to pass through the sample
+        # !!! (Reference form Roger-Li)[https://github.com/Roger-Li/ucb_cs285_homework_fall2023/blob/main/hw2/cs285/networks/policies.py]
+        if self.discrete:
+            action =  action_distribution.sample()
+        else:
+            action = action_distribution.rsample()
+        
+        return ptu.to_numpy(action)
 
     def forward(self, obs: torch.FloatTensor):
         """
@@ -76,15 +79,14 @@ class MLPPolicy(nn.Module):
         flexible objects, such as a `torch.distributions.Distribution` object. It's up to you!
         """
         if self.discrete:
-            # TODO: define the forward pass for a policy with a discrete action space.
+            # DONE: define the forward pass for a policy with a discrete action space.
             prob_action = self.logits_net(obs)
-            action = distributions.Categorical(logits=prob_action)
+            action_distribution = distributions.Categorical(logits=prob_action)
         else:
-            # TODO: define the forward pass for a policy with a continuous action space.
-            mean_prob = self.mean_net(obs)
-            std_prob = torch.exp(self.logstd)
-            action = distributions.MultivariateNormal(loc=mean_prob, covariance_matrix=torch.diag(std_prob))
-        return action
+            # DONE: define the forward pass for a policy with a continuous action space.
+            action_distribution = distributions.Normal(loc=self.mean_net(obs), scale=torch.exp(self.logstd))
+            # action = distributions.MultivariateNormal(loc=mean_prob, covariance_matrix=torch.diag(std_prob))
+        return action_distribution
 
     def update(self, obs: np.ndarray, actions: np.ndarray, *args, **kwargs) -> dict:
         """Performs one iteration of gradient descent on the provided batch of data."""
@@ -105,9 +107,16 @@ class MLPPolicyPG(MLPPolicy):
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
 
-        # TODO: implement the policy gradient actor update.
-        log_p = self.forward(obs).log_prob(actions)
-        loss = -(log_p * advantages).mean()
+        # DONE: implement the policy gradient actor update.
+        action_distribution = self.forward(obs)
+        if self.discrete:
+            log_p = action_distribution.log_prob(actions)
+        else:
+            # For continuous action spaces, actions are typically multidimensional,
+            # so we sum the log prob across dimensions
+            log_p = action_distribution.log_prob(actions).sum(dim=-1)
+
+        loss = -(log_p * advantages).mean() # Negative for gradient ascent
 
         self.optimizer.zero_grad()
         loss.backward()
