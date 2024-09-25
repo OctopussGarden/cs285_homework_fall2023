@@ -204,8 +204,8 @@ Parametrize the policy as stationary (not dependent on time) with a single param
 	In this setting, each episode can continue indefinitely (since we are not using discounting), but at each step, there’s a chance the agent terminates the episode.
 	Due to $\pi_{\theta}$ is parameterized by $\theta$, and $\pi_{\theta}(a_1 | s_1) = \theta$, $\pi_{\theta}(a_2 | s_1) = 1- \theta$, then:
 		$$\begin{aligned}
-			J(\theta) &= \sum_{k=1}^{\infin} \rm Pr(\text{survive for k steps}) \times 1 \\
-			&= \sum_{k=1}^{\infin} \theta^k \\
+			J(\theta) &= \sum_{k=1}^{\infty} \rm Pr(\text{survive for k steps}) \times 1 \\
+			&= \sum_{k=1}^{\infty} \theta^k \\
 			&= \frac{\theta}{1 - \theta} \\
 		\end{aligned}$$
 	Take the gradient with respect to $\theta$: 
@@ -217,8 +217,13 @@ Parametrize the policy as stationary (not dependent on time) with a single param
 
 \textbf{Solution:}
 
-		\[	\mathbb{E}_{\tau \sim \pi_\theta} R(\tau) &= J(\theta) \]
-		\[\nabla_\theta \mathbb{E}_{\tau \sim \pi_\theta} R(\tau) &=  \frac{1}{(1 - \theta) ^ 2}\]
+		$$\begin{aligned}	
+			\mathbb{E}_{\tau \sim \pi_\theta} R(\tau) &= \sum_{k=1}^{\infty} \left(\pi_{\theta}(a_1 | s_1) \times 1 + \pi_{\theta}(a_2 | s_1) \times 0  \right) \\
+			&= \sum_{k=1}^{\infty} \left(\theta \times 1\right) \\
+			&= \frac{\theta}{1 - \theta}  \\
+			\nabla_\theta \mathbb{E}_{\tau \sim \pi_\theta} R(\tau) &=  \frac{1}{(1 - \theta) ^ 2} \\
+			&= \nabla_\theta  J(\theta) \\
+		\end{aligned}$$
 			
 
 \end{enumerate}
@@ -231,7 +236,7 @@ Parametrize the policy as stationary (not dependent on time) with a single param
 
 To compute the variance of the policy gradient in closed form, we first need to express the policy gradient and its associated variance mathematically.
 
-### Step 1: Recall the policy gradient
+Step 1: Recall the policy gradient
 
 The expected return is given by:
 
@@ -245,7 +250,7 @@ The policy gradient is:
 \nabla_\theta J(\theta) = \frac{1}{(1 - \theta)^2}
 \]
 
-### Step 2: Variance of the policy gradient
+Step 2: Variance of the policy gradient
 
 The variance of the policy gradient refers to the variability in the gradient estimates over different episodes. For simplicity, let’s compute the variance of a simple case where each episode either continues with probability \( \theta \) or terminates with probability \( 1 - \theta \).
 
@@ -281,7 +286,7 @@ Using \( \alpha = \theta \), the second moment is:
 \mathbb{E}[R^2] = \frac{\theta(1 + \theta)}{(1 - \theta)^3}
 \]
 
-### Step 3: Compute the variance
+Step 3: Compute the variance
 
 The variance of \( R \), \( \text{Var}(R) \), is given by:
 
@@ -301,7 +306,7 @@ Simplifying the right-hand side:
 \text{Var}(R) = \frac{\theta(1 + \theta)}{(1 - \theta)^3} - \frac{\theta^2}{(1 - \theta)^4}
 \]
 
-### Step 4: Find the minimum and maximum of the variance
+Step 4: Find the minimum and maximum of the variance
 
 To find the values of \( \theta \) where the variance is minimized and maximized, we analyze the expression:
 
@@ -309,25 +314,25 @@ To find the values of \( \theta \) where the variance is minimized and maximized
 \text{Var}(R) = \frac{\theta(1 + \theta)}{(1 - \theta)^3} - \frac{\theta^2}{(1 - \theta)^4}
 \]
 
-1. **At \( \theta = 0 \):**
+1.At \( \theta = 0 \):
 \[
 \text{Var}(R) = 0
 \]
 This makes sense because if \( \theta = 0 \), the agent always terminates after 1 step, so there is no variance in the returns.
 
-2. **At \( \theta = 1 \):**
+2. At \( \theta = 1 \):
 \[
 \text{Var}(R) = \infty
 \]
 This also makes sense because if \( \theta = 1 \), the agent never terminates, and the episode length could become infinitely large, resulting in infinite variance.
 
-3. **For intermediate values of \( \theta \):**
+3. For intermediate values of \( \theta \):
 The variance increases as \( \theta \) increases from 0 to 1, and the variance becomes maximal near \( \theta = 1 \).
 
-### Conclusion:
+Conclusion:
 
-- The **minimal variance** occurs at \( \theta = 0 \), where the policy deterministically terminates the episode after 1 step.
-- The **maximal variance** occurs as \( \theta \) approaches 1, where the agent almost never terminates, leading to highly variable episode lengths.
+- The minimal variance occurs at \( \theta = 0 \), where the policy deterministically terminates the episode after 1 step.
+- The maximal variance occurs as \( \theta \) approaches 1, where the agent almost never terminates, leading to highly variable episode lengths.
 
 
 
@@ -366,6 +371,76 @@ Using the same policy parametrization as above, consider off-policy policy gradi
     \item Write the policy gradient with importance sampling.
 
     \item Compute its variance.
+    
+    \item \textbf{Solution:}
+    
+    (a) Closed-form expression for the policy gradient with importance sampling
+    
+    We want to compute the policy gradient for a policy \( \pi_\theta \), but we're using samples from another policy \( \pi_{\theta'} \). The policy gradient using importance sampling is:
+    
+    \[
+    \nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right]
+    \]
+    
+    For this specific MDP:
+    - A trajectory \( \tau \) either ends at \( s_H \) with reward \( R(\tau) = R_{\text{max}} = 1 \) or ends at \( s_F \) with \( R(\tau) = 0 \).
+    - The importance weight is given by the ratio of probabilities of the trajectory under the two policies:
+    \[
+    \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} = \prod_{t=1}^{H} \frac{\pi_\theta(a_t | s_t)}{\pi_{\theta'}(a_t | s_t)}
+    \]
+    Since each action \( a_t \) can be \( a_1 \) (continuing to the next state) or \( a_2 \) (transitioning to the failure state \( s_F \)), the importance weight for a trajectory \( \tau \) that reaches \( s_H \) (with all actions \( a_1 \)) is:
+    \[
+    \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} = \prod_{t=1}^{H} \frac{\pi_\theta(a_1 | s_t)}{\pi_{\theta'}(a_1 | s_t)} = \left( \frac{\theta}{\theta'} \right)^H
+    \]
+    because the probability of taking \( a_1 \) in each state under \( \pi_\theta \) is \( \theta \), and under \( \pi_{\theta'} \) is \( \theta' \).
+    
+    Thus, the policy gradient becomes:
+    \[
+    \nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \left( \frac{\theta}{\theta'} \right)^H \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right]
+    \]
+    For trajectories that end at \( s_H \), \( R(\tau) = 1 \), and for those that end at \( s_F \), \( R(\tau) = 0 \).
+    
+    Since \( \log \pi_\theta(\tau) = H \log \theta \) for successful trajectories (all \( a_1 \)), the policy gradient simplifies to:
+    \[
+    \nabla_\theta J(\theta) = H \left( \frac{\theta}{\theta'} \right)^H \frac{1}{\theta}
+    \]
+    This expression holds for trajectories that succeed in reaching \( s_H \) (because \( R(\tau) = 1 \) for these trajectories).
+    
+    (b) Closed-form expression for the variance
+    
+    The variance of the policy gradient can be computed as:
+    
+    \[
+    \text{Var}(\nabla_\theta J(\theta)) = \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \left( \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right)^2 \right] - \left( \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right] \right)^2
+    \]
+    
+    Let’s break this down:
+    1. Expected squared term:
+    For successful trajectories \( \tau \), we have \( \nabla_\theta \log \pi_\theta(\tau) = H/\theta \) and \( R(\tau) = 1 \), so the squared term is:
+    \[
+    \left( \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right)^2 = \left( \left( \frac{\theta}{\theta'} \right)^H \frac{H}{\theta} \right)^2 = \left( \frac{H \theta^{H-1}}{(\theta')^H} \right)^2
+    \]
+    The expectation over \( \pi_{\theta'} \) would consider the probability of success under \( \pi_{\theta'} \), which is \( (\theta')^H \). Thus, the expected value becomes:
+    \[
+    \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \left( \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right)^2 \right] = \left( \frac{H \theta^{H-1}}{\theta'} \right)^2
+    \]
+    
+    2. Square of the expected term:
+    From part (a), we know the expected policy gradient is:
+    \[
+    \mathbb{E}_{\tau \sim \pi_{\theta'}} \left[ \frac{\pi_\theta(\tau)}{\pi_{\theta'}(\tau)} \nabla_\theta \log \pi_\theta(\tau) R(\tau) \right] = H \left( \frac{\theta}{\theta'} \right)^H \frac{1}{\theta}
+    \]
+    Squaring this term gives:
+    \[
+    \left( H \left( \frac{\theta}{\theta'} \right)^H \frac{1}{\theta} \right)^2 = \left( \frac{H \theta^{H-1}}{\theta'} \right)^2
+    \]
+    
+    Thus, the variance is:
+    \[
+    \text{Var}(\nabla_\theta J(\theta)) = \left( \frac{H \theta^{H-1}}{\theta'} \right)^2 - \left( \frac{H \theta^{H-1}}{\theta'} \right)^2 = 0
+    \]
+    
+    In this simple case, the variance is zero because we are assuming a deterministic environment with a clear outcome based on the actions taken, leading to no stochasticity in the gradient estimates. However, in practice, if the environment or the policy had any stochasticity, the variance could be non-zero.
 
 \end{enumerate}
 
