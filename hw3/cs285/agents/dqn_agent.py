@@ -117,11 +117,10 @@ class DQNAgent(nn.Module):
         Update the DQN agent, including both the critic and target.
         """
         # TODO(student): update the critic, and the target if needed
-        # Update the critic for `step` times
-        for _ in range(step):
-            critic_stats = self.update_critic(obs, action, reward, next_obs, done)
+        critic_stats = self.update_critic(obs, action, reward, next_obs, done)
         
         # Update the target
-        self.update_target_critic()
+        if step % self.target_update_period == 0:
+            self.update_target_critic()
 
         return critic_stats
